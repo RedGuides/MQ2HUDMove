@@ -350,8 +350,8 @@ VOID HUDMove(PSPAWNINFO pChar, PCHAR szLine)
    }
    else
    {
-      int NewX=((PMOUSEINFO)EQADDR_MOUSE)->X;
-      int NewY=((PMOUSEINFO)EQADDR_MOUSE)->Y;
+      int NewX=((MQMouseInfo*)EQADDR_MOUSE)->X;
+      int NewY=((MQMouseInfo*)EQADDR_MOUSE)->Y;
       sprintf_s(NewIni,"%s,%d,%d,%s",Type,NewX,NewY,Text);
    }
    WritePrivateProfileString(LastSection,Name,NewIni,IniName);
