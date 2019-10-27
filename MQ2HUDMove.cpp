@@ -49,7 +49,7 @@ MGB=3,172,357,0,255,0,MGB:  ${Me.AltAbilityTimer[Mass Group Buff].TimeHMS}
 
 ************************************************************************************/
 
-#include <MQ2Plugin.h>
+#include <mq/Plugin.h>
 
 CHAR IniName[MAX_STRING]={0};
 CHAR LastSection[MAX_STRING]={0};
