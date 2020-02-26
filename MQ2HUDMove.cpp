@@ -49,7 +49,7 @@ MGB=3,172,357,0,255,0,MGB:  ${Me.AltAbilityTimer[Mass Group Buff].TimeHMS}
 
 ************************************************************************************/
 
-#include "../MQ2Plugin.h"
+#include <mq/Plugin.h>
 
 CHAR IniName[MAX_STRING]={0};
 CHAR LastSection[MAX_STRING]={0};
@@ -285,7 +285,7 @@ VOID HUDMove(PSPAWNINFO pChar, PCHAR szLine)
    CHAR Section[MAX_STRING]={0};
    CHAR IniString[MAX_STRING]={0};
    CHAR Temp[MAX_STRING]={0};
-   
+
    if(Name[0]==0)
    {
       WriteChatColor("HUDMove usage:",COLOR_DEFAULT);
@@ -350,8 +350,8 @@ VOID HUDMove(PSPAWNINFO pChar, PCHAR szLine)
    }
    else
    {
-      int NewX=((PMOUSEINFO)EQADDR_MOUSE)->X;
-      int NewY=((PMOUSEINFO)EQADDR_MOUSE)->Y;
+      int NewX=((MQMouseInfo*)EQADDR_MOUSE)->X;
+      int NewY=((MQMouseInfo*)EQADDR_MOUSE)->Y;
       sprintf_s(NewIni,"%s,%d,%d,%s",Type,NewX,NewY,Text);
    }
    WritePrivateProfileString(LastSection,Name,NewIni,IniName);
