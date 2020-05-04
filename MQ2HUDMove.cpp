@@ -51,42 +51,33 @@ MGB=3,172,357,0,255,0,MGB:  ${Me.AltAbilityTimer[Mass Group Buff].TimeHMS}
 
 #include "../MQ2Plugin.h"
 
-CHAR IniName[MAX_STRING]={0};
-CHAR LastSection[MAX_STRING]={0};
+char IniName[MAX_STRING]={0};
+char LastSection[MAX_STRING]={0};
 
 PreSetup("MQ2HUDMove");
 
-VOID SetLast()
+void SetLast()
 {
-   CHAR Temp[MAX_STRING]={0};
-   CHAR Section[MAX_STRING]={0};
-   sprintf_s(Temp,"%s_%s",GetCharInfo()->Name,EQADDR_SERVERNAME);
-   GetPrivateProfileString(Temp,"Last","Elements",Section,MAX_STRING,IniName);
-   if(!strcmp(Section,"NULL"))
-      GetPrivateProfileString("MQ2HUD","Last","Elements",Section,MAX_STRING,INIFileName);
-   if(strchr(Section,','))
-   {
-      char * Tok;
-      Tok=strtok_s(Section,",",NULL);
-      while(Tok!=NULL)
-      {
-         strcpy_s(Temp,Tok);
-         Tok=strtok_s(NULL,",",NULL);
-      }
-      strcpy_s(LastSection,Temp);
-   }
-   else
-      strcpy_s(LastSection,Section);
-   return;
+    char Temp[MAX_STRING] = { 0 };
+    char Section[MAX_STRING] = { 0 };
+    sprintf_s(Temp, "%s_%s", GetCharInfo()->Name, EQADDR_SERVERNAME);
+    GetPrivateProfileString(Temp, "Last", "NULL", Section, MAX_STRING, IniName);
+    if (!strcmp(Section, "NULL"))
+        GetPrivateProfileString("MQ2HUD", "Last", "Elements", Section, MAX_STRING, INIFileName);
+
+    if (char* pch = strrchr(Section, ','))
+        strcpy_s(LastSection, pch + 1);
+    else
+        strcpy_s(LastSection, Section);
 }
 
 // List HUDs
-VOID List()
+void List()
 {
-   CHAR Temp[MAX_STRING]={0};
-   CHAR Section[MAX_STRING]={0};
-   CHAR IniString[MAX_STRING]={0};
-   CHAR* szElements=0;
+   char Temp[MAX_STRING]={0};
+   char Section[MAX_STRING]={0};
+   char IniString[MAX_STRING]={0};
+   char* szElements=0;
    int i=0;
    GetPrivateProfileString(NULL,NULL,NULL,IniString,MAX_STRING,IniName);
    WriteChatf("\at--\ax [sections] \atin MQ2HUD.ini --\ax");
@@ -104,26 +95,34 @@ VOID List()
    SetLast();
    GetPrivateProfileString(LastSection,NULL,NULL,IniString,MAX_STRING,IniName);
    WriteChatf("\at-- Available HUDs in loaded section\ax [%s] --",LastSection);
-   szElements=IniString;
-   for(i=0; i==0 || (IniString[i-1]!=0 || IniString[i]!=0) ; i++)
+   if (IniString[0] != 0)
    {
-      if(IniString[i]==0)
+      szElements = IniString;
+      for (i = 0; i == 0 || (IniString[i - 1] != 0 || IniString[i] != 0); i++)
       {
-         strcpy_s(Temp,szElements);
-         WriteChatColor(Temp, COLOR_DEFAULT);
-         szElements = &IniString[i+1];
+         if (IniString[i] == 0)
+         {
+            strcpy_s(Temp, szElements);
+            WriteChatColor(Temp, COLOR_DEFAULT);
+            szElements = &IniString[i + 1];
+         }
       }
+   }
+   else
+   {
+      WriteChatColor("~None~", COLOR_DEFAULT);
    }
 }
 
 // Re-write the ini string with new coordinates
-template <unsigned int _Size>PCHAR FormatString(CHAR(&NewIniString)[_Size],PCHAR IniString,PCHAR Direction,PCHAR Units)
+template <unsigned int _Size>
+char* FormatString(char(&NewIniString)[_Size],char* IniString,char* Direction,char* Units)
 {
-   CHAR Type[MAX_STRING]={0}; GetArg(Type,IniString,1,FALSE,FALSE,TRUE);
-   CHAR XPos[MAX_STRING]={0}; GetArg(XPos,IniString,2,FALSE,FALSE,TRUE);
-   CHAR YPos[MAX_STRING]={0}; GetArg(YPos,IniString,3,FALSE,FALSE,TRUE);
-   CHAR Text[MAX_STRING]={0};
-   PSTR Rest=GetNextArg(IniString,3,TRUE);
+   char Type[MAX_STRING]={0}; GetArg(Type,IniString,1,FALSE,FALSE,TRUE);
+   char XPos[MAX_STRING]={0}; GetArg(XPos,IniString,2,FALSE,FALSE,TRUE);
+   char YPos[MAX_STRING]={0}; GetArg(YPos,IniString,3,FALSE,FALSE,TRUE);
+   char Text[MAX_STRING]={0};
+   char* Rest=GetNextArg(IniString,3,TRUE);
    strcpy_s(Text,Rest);
 
    if(!strcmp(Direction,"right"))
@@ -150,12 +149,24 @@ template <unsigned int _Size>PCHAR FormatString(CHAR(&NewIniString)[_Size],PCHAR
 }
 
 // Move all HUDs
-bool MoveAll(PCHAR MoveSection, PCHAR Direction, PCHAR Units)
+bool MoveAll(char* MoveSection, char* Direction, char* Units)
 {
-   CHAR Temp[MAX_STRING]={0};
-   CHAR IniString[MAX_STRING]={0};
-   CHAR NewIniString[MAX_STRING]={0};
-   CHAR* szElements=0;
+   bool error = false;
+   if (!strlen(Direction)) {
+       WriteChatf("\arError:\ax No Direction provided. Options are left, right, up, or down.");
+       error = true;
+   }
+   if (!strlen(Units)) {
+       WriteChatf("\arError:\ax No Distance provided. Please provide a number of pixels to move %s.", (error ? "" : Direction));
+       error = true;
+   }
+   if (error)
+       return true;
+
+   char Temp[MAX_STRING]={0};
+   char IniString[MAX_STRING]={0};
+   char NewIniString[MAX_STRING]={0};
+   char* szElements=0;
    int i=0;
 
    if(!strcmp(MoveSection,"all"))
@@ -196,15 +207,15 @@ bool MoveAll(PCHAR MoveSection, PCHAR Direction, PCHAR Units)
 }
 
 // Move a custom ";<x> CommentSection" of HUDs
-VOID MoveSection(PCHAR MoveSection, PCHAR Direction, PCHAR Units)
+void MoveSection(char* MoveSection, char* Direction, char* Units)
 {
-   CHAR Temp[MAX_STRING]={0};
-   CHAR Key[MAX_STRING]={0};
-   CHAR Section[MAX_STRING]={0};
-   CHAR IniString[MAX_STRING]={0};
-   CHAR NewIniString[MAX_STRING]={0};
-   CHAR IniSection[MAX_STRING]={0};
-   CHAR szLine[10240]={0};
+   char Temp[MAX_STRING]={0};
+   char Key[MAX_STRING]={0};
+   char Section[MAX_STRING]={0};
+   char IniString[MAX_STRING]={0};
+   char NewIniString[MAX_STRING]={0};
+   char IniSection[MAX_STRING]={0};
+   char szLine[10240]={0};
    char * Tok = 0;
    char * Next_Token = 0;
    Tok=strtok_s(MoveSection,";", &Next_Token);
@@ -277,15 +288,15 @@ VOID MoveSection(PCHAR MoveSection, PCHAR Direction, PCHAR Units)
 }
 
 // /hudmove
-VOID HUDMove(PSPAWNINFO pChar, PCHAR szLine)
+void HUDMove(PSPAWNINFO pChar, char* szLine)
 {
-   CHAR Name[MAX_STRING]={0}; GetArg(Name,szLine,1);
-   CHAR Option[MAX_STRING]={0}; GetArg(Option,szLine,2);
-   CHAR Units[MAX_STRING]={0}; GetArg(Units,szLine,3);
-   CHAR Section[MAX_STRING]={0};
-   CHAR IniString[MAX_STRING]={0};
-   CHAR Temp[MAX_STRING]={0};
-   
+   char Name[MAX_STRING]={0}; GetArg(Name,szLine,1);
+   char Option[MAX_STRING]={0}; GetArg(Option,szLine,2);
+   char Units[MAX_STRING]={0}; GetArg(Units,szLine,3);
+   char Section[MAX_STRING]={0};
+   char IniString[MAX_STRING]={0};
+   char Temp[MAX_STRING]={0};
+
    if(Name[0]==0)
    {
       WriteChatColor("HUDMove usage:",COLOR_DEFAULT);
@@ -335,10 +346,10 @@ VOID HUDMove(PSPAWNINFO pChar, PCHAR szLine)
       WritePrivateProfileString(Section,Name,NULL,IniName);
       return;
    }
-   CHAR Type[MAX_STRING]={0};
-   CHAR Text[MAX_STRING]={0};
-   CHAR NewIni[MAX_STRING]={0};
-   PSTR Rest;
+   char Type[MAX_STRING]={0};
+   char Text[MAX_STRING]={0};
+   char NewIni[MAX_STRING]={0};
+   char* Rest;
    GetArg(Type,IniString,1,FALSE,FALSE,TRUE);
    Rest=GetNextArg(IniString,3,TRUE);
    strcpy_s(Text,Rest);
@@ -359,12 +370,12 @@ VOID HUDMove(PSPAWNINFO pChar, PCHAR szLine)
 }
 
 // Color a single HUD
-VOID HUDColor(PSPAWNINFO pChar, PCHAR szLine)
+void HUDColor(PSPAWNINFO pChar, char* szLine)
 {
-   CHAR Name[MAX_STRING]={0}; GetArg(Name,szLine,1);
-   CHAR Color[MAX_STRING]={0}; GetArg(Color,szLine,2);
-   CHAR Section[MAX_STRING]={0};
-   CHAR IniString[MAX_STRING]={0};
+   char Name[MAX_STRING]={0}; GetArg(Name,szLine,1);
+   char Color[MAX_STRING]={0}; GetArg(Color,szLine,2);
+   char Section[MAX_STRING]={0};
+   char IniString[MAX_STRING]={0};
 
    if(Name[0]==0)
    {
@@ -443,12 +454,12 @@ VOID HUDColor(PSPAWNINFO pChar, PCHAR szLine)
          WriteChatf("\arError:\ax No preset color named \"%s\"",Color);
          return;
       }
-      CHAR Type[MAX_STRING]={0};
-      CHAR XPos[MAX_STRING]={0};
-      CHAR YPos[MAX_STRING]={0};
-      CHAR Text[MAX_STRING]={0};
-      CHAR NewIni[MAX_STRING]={0};
-      PSTR Rest;
+      char Type[MAX_STRING]={0};
+      char XPos[MAX_STRING]={0};
+      char YPos[MAX_STRING]={0};
+      char Text[MAX_STRING]={0};
+      char NewIni[MAX_STRING]={0};
+      char* Rest;
       GetArg(Type,IniString,1,FALSE,FALSE,TRUE);
       GetArg(XPos,IniString,2,FALSE,FALSE,TRUE);
       GetArg(YPos,IniString,3,FALSE,FALSE,TRUE);
@@ -461,12 +472,12 @@ VOID HUDColor(PSPAWNINFO pChar, PCHAR szLine)
    return;
 }
 
-VOID HUDList(PSPAWNINFO pChar, PCHAR szLine)
+void HUDList(PSPAWNINFO pChar, char* szLine)
 {
    List();
 }
 
-PLUGIN_API VOID InitializePlugin(VOID)
+PLUGIN_API void InitializePlugin()
 {
    strcpy_s(IniName,gszINIPath);
    strcat_s(IniName,"\\MQ2HUD.ini");
@@ -475,7 +486,7 @@ PLUGIN_API VOID InitializePlugin(VOID)
    AddCommand("/hudlist",HUDList);
 }
 
-PLUGIN_API VOID ShutdownPlugin(VOID)
+PLUGIN_API void ShutdownPlugin()
 {
    RemoveCommand("/hudmove");
    RemoveCommand("/hudcolor");
