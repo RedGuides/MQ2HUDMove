@@ -51,10 +51,11 @@ MGB=3,172,357,0,255,0,MGB:  ${Me.AltAbilityTimer[Mass Group Buff].TimeHMS}
 
 #include <mq/Plugin.h>
 
+PreSetup("MQ2HUDMove");
+PLUGIN_VERSION(2005.0309);
+
 CHAR IniName[MAX_STRING]={0};
 CHAR LastSection[MAX_STRING]={0};
-
-PreSetup("MQ2HUDMove");
 
 VOID SetLast()
 {
@@ -218,8 +219,8 @@ VOID MoveSection(PCHAR MoveSection, PCHAR Direction, PCHAR Units)
    if(!strcmp(Direction,"up") || !strcmp(Direction,"down") ||
       !strcmp(Direction,"left") || !strcmp(Direction,"right"))
    {
-	   FILE *file = 0;
-	   errno_t err = fopen_s(&file, IniName, "rt");
+      FILE *file = 0;
+      errno_t err = fopen_s(&file, IniName, "rt");
       if(!err)
       {
          while(fgets(szLine,10240,file))
@@ -466,16 +467,16 @@ VOID HUDList(PSPAWNINFO pChar, PCHAR szLine)
    List();
 }
 
-PLUGIN_API VOID InitializePlugin(VOID)
+PLUGIN_API VOID InitializePlugin()
 {
-   strcpy_s(IniName,gszINIPath);
+   strcpy_s(IniName,gPathConfig);
    strcat_s(IniName,"\\MQ2HUD.ini");
    AddCommand("/hudmove",HUDMove);
    AddCommand("/hudcolor",HUDColor);
    AddCommand("/hudlist",HUDList);
 }
 
-PLUGIN_API VOID ShutdownPlugin(VOID)
+PLUGIN_API VOID ShutdownPlugin()
 {
    RemoveCommand("/hudmove");
    RemoveCommand("/hudcolor");
