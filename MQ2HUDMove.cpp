@@ -32,7 +32,7 @@ Syntax:
 (the semi colon tells it to move a comment section)
 
 Example: "/hudmove ;section1 up 50" would move all entries below ";<x> section1" until it
-       reaches either the next ";<x>" or the next ini [section].
+         reaches either the next ";<x>" or the next ini [section].
 
 -- example ini (only ManaRegen and BuffCount would be moved) -----------------------
 [blah]
@@ -57,21 +57,19 @@ PLUGIN_VERSION(2005.0309);
 char IniName[MAX_STRING]={0};
 char LastSection[MAX_STRING]={0};
 
-PreSetup("MQ2HUDMove");
-
 void SetLast()
 {
-    char Temp[MAX_STRING] = { 0 };
-    char Section[MAX_STRING] = { 0 };
-    sprintf_s(Temp, "%s_%s", GetCharInfo()->Name, EQADDR_SERVERNAME);
-    GetPrivateProfileString(Temp, "Last", "NULL", Section, MAX_STRING, IniName);
-    if (!strcmp(Section, "NULL"))
-        GetPrivateProfileString("MQ2HUD", "Last", "Elements", Section, MAX_STRING, INIFileName);
+   char Temp[MAX_STRING] = { 0 };
+   char Section[MAX_STRING] = { 0 };
+   sprintf_s(Temp, "%s_%s", GetCharInfo()->Name, EQADDR_SERVERNAME);
+   GetPrivateProfileString(Temp, "Last", "NULL", Section, MAX_STRING, IniName);
+   if (!strcmp(Section, "NULL"))
+      GetPrivateProfileString("MQ2HUD", "Last", "Elements", Section, MAX_STRING, INIFileName);
 
-    if (char* pch = strrchr(Section, ','))
-        strcpy_s(LastSection, pch + 1);
-    else
-        strcpy_s(LastSection, Section);
+   if (char* pch = strrchr(Section, ','))
+      strcpy_s(LastSection, pch + 1);
+   else
+      strcpy_s(LastSection, Section);
 }
 
 // List HUDs
@@ -156,15 +154,15 @@ bool MoveAll(char* MoveSection, char* Direction, char* Units)
 {
    bool error = false;
    if (!strlen(Direction)) {
-       WriteChatf("\arError:\ax No Direction provided. Options are left, right, up, or down.");
-       error = true;
+      WriteChatf("\arError:\ax No Direction provided. Options are left, right, up, or down.");
+      error = true;
    }
    if (!strlen(Units)) {
-       WriteChatf("\arError:\ax No Distance provided. Please provide a number of pixels to move %s.", (error ? "" : Direction));
-       error = true;
+      WriteChatf("\arError:\ax No Distance provided. Please provide a number of pixels to move %s.", (error ? "" : Direction));
+      error = true;
    }
    if (error)
-       return true;
+      return true;
 
    char Temp[MAX_STRING]={0};
    char IniString[MAX_STRING]={0};
