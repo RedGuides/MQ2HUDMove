@@ -61,7 +61,7 @@ void SetLast()
 {
    char Temp[MAX_STRING] = { 0 };
    char Section[MAX_STRING] = { 0 };
-   sprintf_s(Temp, "%s_%s", GetCharInfo()->Name, EQADDR_SERVERNAME);
+   sprintf_s(Temp, "%s_%s", pLocalPC->Name, GetServerShortName());
    GetPrivateProfileString(Temp, "Last", "NULL", Section, MAX_STRING, IniName);
    if (!strcmp(Section, "NULL"))
       GetPrivateProfileString("MQ2HUD", "Last", "Elements", Section, MAX_STRING, INIFileName);
