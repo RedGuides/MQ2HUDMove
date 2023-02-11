@@ -230,9 +230,8 @@ void MoveSection(char* MoveSection, char* Direction, char* Units)
    if(!strcmp(Direction,"up") || !strcmp(Direction,"down") ||
       !strcmp(Direction,"left") || !strcmp(Direction,"right"))
    {
-      FILE *file = 0;
-      errno_t err = fopen_s(&file, IniName, "rt");
-      if(!err)
+      FILE *file = _fsopen(IniName, "rt", _SH_DENYNO);
+      if(file)
       {
          while(fgets(szLine,10240,file))
          {
